@@ -255,3 +255,58 @@ class SolicitudPrestamo(APIView):
                 return Response('No anda',status=status.HTTP_404_NOT_FOUND)
         else:
             return Response('no autorizado',status=status.HTTP_404_NOT_FOUND)
+
+        #----------------Punto siete--------------------
+
+class EliminarPrestamo(APIView):
+    permission_classes = [permissions.IsAuthenticated,esEmpleado]
+    def delete(self, request,prestamo_id):
+        username = request.user
+        print("gola")
+        user=ids.objects.filter(username=username).first()
+            
+        if (user.tipo == 'empleado' ):
+            
+            
+            prestamo = Prestamos.objects.filter(pk=prestamo_id).first()
+           
+            cuenta = Cuentas.objects.get(cliente_id= prestamo.cliente_id)
+            if cuenta:
+                cuenta.saldo = int(cuenta.saldo)-int(prestamo.monto)
+                cuenta.save()
+            else:
+                return Response('No existe cuenta',status=status.HTTP_404_NOT_FOUND)
+            if prestamo:
+             
+                prestamo.delete()
+                
+                return Response("presamo eliminado", status=status.HTTP_201_CREATED) 
+
+            else:
+                return Response('No anda',status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response('no autorizado',status=status.HTTP_404_NOT_FOUND)
+#----------------Punto ocho--------------------   
+   
+class ModificarDireccionCliente(APIView):
+   def put(self, request, cliente_id):
+        permission_classes = [permissions.IsAuthenticated]
+        username = request.user
+        
+        owner=cliente_id
+        try:
+            user=ids.objects.filter(username=username).first()
+            dni=user.cliente_id
+        except:
+            dni = -1
+        if (dni == owner or user.tipo == 'empleado' ):
+            cliente = Clientes.objects.filter(cliente_id=cliente_id).first()
+            direccion = Direcciones.objects.get(pk = cliente.id)
+            print(direccion)
+            serializer = DireccionesSerializer(direccion, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
+        else:
+            return Response('no coincide el dni ni es empleado',status=status.HTTP_404_NOT_FOUND)   
