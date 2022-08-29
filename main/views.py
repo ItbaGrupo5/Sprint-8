@@ -157,3 +157,26 @@ class SaldoCuenta(APIView):
                 return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response('no coincide el dni ni es empleado',status=status.HTTP_404_NOT_FOUND)
+            
+#----------------Punto tres--------------------
+class TotalPrestamos(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    def get(self, request, cliente_id):
+        username = request.user
+        
+        owner=cliente_id
+        try:
+            user=ids.objects.filter(username=username).first()
+            dni=user.cliente_id
+        except:
+            dni = -1
+        if (dni == owner or user.tipo == 'empleado' ):
+            datos = Prestamos.objects.filter(cliente_id=owner)
+            serializer = PrestamoSerializer(datos,many=True)
+
+            if datos:
+
+                return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response('no coincide el dni ni es empleado',status=status.HTTP_404_NOT_FOUND)
+from operator import attrgetter
