@@ -229,3 +229,29 @@ class DatosTarjetaCliente(APIView):
         else:
             return Response('no coincide el dni ni es empleado',status=status.HTTP_404_NOT_FOUND)
 
+#----------------Punto seis--------------------
+class SolicitudPrestamo(APIView):
+    permission_classes = [permissions.IsAuthenticated,esEmpleado]
+    def post(self, request):
+        username = request.user
+        
+        user=ids.objects.filter(username=username).first()
+            
+        if (user.tipo == 'empleado' ):
+            data=request.data
+            data['fecha_inicio']=date.today().strftime('%Y-%m-%d')
+            
+            serializer = PrestamosSerializer(data=request.data)
+            print(serializer)
+            if serializer.is_valid():
+                serializer.save()
+                monto=data['monto']
+                cuenta= Cuentas.objects.get(cliente_id = data['cliente_id'])
+                cuenta.saldo = cuenta.saldo + monto
+                cuenta.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED) 
+
+            else:
+                return Response('No anda',status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response('no autorizado',status=status.HTTP_404_NOT_FOUND)
