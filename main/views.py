@@ -180,3 +180,52 @@ class TotalPrestamos(APIView):
         else:
             return Response('no coincide el dni ni es empleado',status=status.HTTP_404_NOT_FOUND)
 from operator import attrgetter
+
+#----------------Punto cuatro--------------------
+class TotalPrestamosSucursal(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    def get(self, request, sucursal_id):
+        username = request.user
+        
+        user=ids.objects.filter(username=username).first()
+            
+        if (user.tipo == 'empleado' ):
+            clientes = Clientes.objects.filter(sucursal= sucursal_id)
+            clid = map(attrgetter('cliente_id'), clientes)
+            prestamos = Prestamos.objects.filter(cliente_id__in=clid)
+            print(prestamos)
+           
+            
+            #datos = Prestamos.objects.filter(cliente_id=owner)
+            #serializer = PrestamoSerializer(prestamos)
+
+            if prestamos:
+
+                return Response(PrestamoSerializer(prestamos, many=True).data)
+            else:
+                return Response('esta sucursal no tiene prestamos',status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response('no autorizado',status=status.HTTP_404_NOT_FOUND)
+#----------------Punto cinco--------------------
+
+class DatosTarjetaCliente(APIView):
+    permission_classes = [permissions.IsAuthenticated,esEmpleado]
+    def get(self, request, cliente_id):
+        username = request.user
+        owner= Clientes.objects.get(cliente_id = cliente_id)
+        try:
+            user=ids.objects.filter(username=username).first()
+            dni=user.cliente_id
+        except:
+            dni = -1
+        if (user.tipo == 'empleado' ):
+            datos = Tarjetas.objects.filter(id= owner.id).first()
+            serializer = TarjetasSerializer(datos)
+
+        
+            if datos:
+
+                return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response('no coincide el dni ni es empleado',status=status.HTTP_404_NOT_FOUND)
+
