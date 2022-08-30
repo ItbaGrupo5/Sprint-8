@@ -107,6 +107,13 @@ def registro(request):
         dni.save()
         user = User.objects.create_user(usuario, email, pwd)
         user.save()
+        
+        cuenta = Cuentas.objects.create (cliente_id = cliente_id, saldo = 0, tipo= "cuenta_ahorro")
+        cuenta.save()
+
+        cliente = Clientes.objects.create (nombre= usuario, cliente_id = cliente_id, sucursal= random.randint(0,4), categoria= random.choice(['classic', 'gold', 'balck']))
+        cliente.save()
+        
         print('creado')
         #En lugar de renderizar el template de prestamoo hacemos un redireccionamiento enviando una variable OK
         return redirect(reverse('login'))
