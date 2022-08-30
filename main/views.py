@@ -97,10 +97,10 @@ def registro(request):
         print(cliente_id,email,pwd)
         #user = User.objects.create_user('john', 'lennon@thebeatles.com', 'johnpassword')
         try:
-            persona= Clientes.objects.filter(cliente_id=cliente_id)[0]
+            persona= Clientes.objects.filter(cliente_id=cliente_id).first()
             tipo='cliente'
         except:
-            persona= Empleados.objects.filter(cliente_id=cliente_id)[0]
+            persona= Empleados.objects.filter(cliente_id=cliente_id).first()
             tipo='empleado'
 
         dni = ids(cliente_id=cliente_id,username=usuario,tipo=tipo)
